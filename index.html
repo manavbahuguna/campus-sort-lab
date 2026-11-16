@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A campus waste classification demo for Integrated Waste Management.">
+  <title>Campus Sort Lab · Waste Classification</title>
+  <link rel="stylesheet" href="./styles.css?v=4">
+  <script type="module" src="./app.js?v=4"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap nav">
+      <a class="brand" href="./"><span aria-hidden="true">♻</span> Campus Sort Lab</a>
+      <nav aria-label="Page sections"><a href="#scanner">Classifier</a><a href="#session">Dashboard</a><a href="#campus-map">Bin map</a><a href="#simulator">Simulator</a><a href="#course">Course guide</a><a href="#quiz">Quiz</a><a href="#evaluation">Model results</a></nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="title">
+      <p class="eyebrow">21CEO403T / INTEGRATED WASTE MANAGEMENT</p>
+      <h1 id="title">What goes<br><em>in which bin?</em></h1>
+      <p>Scan one waste item to identify the material and trace its path through campus collection, processing, and disposal.</p>
+      <div class="tags"><span>6 material classes</span><span>Photos stay on your device</span></div>
+    </section>
+    <section class="workspace" id="scanner" aria-label="Waste classifier">
+      <article class="card">
+        <p class="eyebrow">01 / INPUT</p>
+        <h2>Scan an item</h2>
+        <p class="muted">Use one item against a plain background.</p>
+        <label class="drop" id="drop" for="photo">
+          <img id="preview" alt="Selected waste item" hidden>
+          <span id="placeholder"><span class="scan-icon" aria-hidden="true">⌑</span><strong>Choose or drop a photo</strong><small>JPEG, PNG, or WebP · up to 10 MB</small></span>
+        </label>
+        <input id="photo" type="file" accept="image/jpeg,image/png,image/webp" class="visually-hidden">
+        <input id="camera" type="file" accept="image/*" capture="environment" class="visually-hidden">
+        <div class="actions"><button id="classify" class="primary" disabled>Classify photo</button><label class="secondary" for="camera">Take photo</label></div>
+        <p id="status" role="status" class="muted">Waiting for a photo.</p>
+        <p class="eyebrow sample-title">TRY A HELD-OUT SAMPLE</p>
+        <div class="samples">
+          <button type="button" data-sample="cardboard"><img src="./examples/cardboard.jpg" alt="">Cardboard</button>
+          <button type="button" data-sample="plastic"><img src="./examples/plastic.jpg" alt="">Plastic</button>
+          <button type="button" data-sample="trash"><img src="./examples/trash.jpg" alt="">Residual</button>
+          <button type="button" data-sample="uncertain"><img src="./examples/uncertain.jpg" alt="">Uncertain</button>
+        </div>
+      </article>
+      <article class="card result">
+        <p class="eyebrow">02 / RESULT</p>
+        <h2>What happens next?</h2>
+        <div id="result" aria-live="polite">
+          <div class="empty"><span aria-hidden="true">↗</span><strong>Your result will appear here</strong><p>Choose a photo or a sample to see the material and its waste pathway.</p></div>
+        </div>
+      </article>
+    </section>
+    <section class="card session" id="session">
+      <p class="eyebrow">LIVE DEMO DASHBOARD</p>
+      <h2>Your scan session</h2>
+      <p class="muted">Counts include sample photos and repeat scans. Start a fresh session for each demonstration.</p>
+      <div class="stats" aria-live="polite">
+        <div><strong id="scan-count">0</strong><span>Completed scans</span></div>
+        <div><strong id="review-count">0</strong><span>Retake suggested</span></div>
+        <div><strong id="average-score">—</strong><span>Average leading score</span></div>
+      </div>
+      <div id="material-mix"></div>
+      <div class="section-heading"><h3>Scan history</h3><div class="actions">
+        <button id="export-session" disabled>Download CSV report</button>
+        <button id="clear-session" disabled>Clear session</button>
+      </div></div>
+      <p class="muted" id="history-empty">Classify a photo to start your session.</p>
+      <div class="table-scroll" id="history-table" hidden>
+        <table><caption class="visually-hidden">Current scan session</caption>
+          <thead><tr><th scope="col">Time</th><th scope="col">Source</th><th scope="col">Leading guess</th><th scope="col">Score</th><th scope="col">Action</th></tr></thead>
+          <tbody id="history-rows"></tbody>
+        </table>
+      </div>
+      <p class="muted session-note">Session results stay in this tab until cleared or reloaded. The download contains prediction details.</p>
+    </section>
+    <section class="guide" id="course">
+      <p class="eyebrow">THE COURSE CONNECTION</p>
+      <h2>Follow the waste stream</h2>
+      <div class="units">
+        <article><span>UNIT III</span><h3>Collect</h3><p>Segregated waste goes into labelled stationary bins. Collection vehicles empty the bins, and recyclables can go to a material recovery facility for sorting.</p></article>
+        <article><span>UNIT IV</span><h3>Process</h3><p>Balers compact cardboard for transport. Shredders reduce accepted plastics in size. Facilities can separate metals using magnets and eddy currents.</p></article>
+        <article><span>UNIT V</span><h3>Dispose</h3><p>Where residual waste goes to a sanitary landfill, liners limit seepage, leachate drains collect contaminated liquid, and gas systems collect landfill gas.</p></article>
+      </div>
+      <div class="card explorer">
+        <label for="material"><strong>Explore a material pathway</strong></label>
+        <select id="material" aria-describedby="path-note"></select>
+        <div id="explorer-path" aria-live="polite"></div>
+        <p class="muted" id="path-note">These are example pathways. Follow campus signage for actual collection rules.</p>
+      </div>
+    </section>
+    <section class="card campus-map" id="campus-map">
+      <p class="eyebrow">UNIT III · SEGREGATED COLLECTION</p><h2>Campus bin map</h2>
+      <p class="muted">Illustrative campus layout. Locations and accepted materials are demo data.</p>
+      <label for="bin-filter">Show bins accepting</label><select id="bin-filter"><option value="all">All materials</option></select>
+      <div class="map-layout"><div class="campus-plan" aria-label="Illustrative campus bin map"><div class="map-road" aria-hidden="true"></div><span class="map-building library">Library</span><span class="map-building canteen">Canteen</span><span class="map-building labs">Academic block</span><span class="map-building hostel">Hostel</span><div id="map-pins"></div></div><div id="bin-details" aria-live="polite"></div></div>
+      <p id="bin-count" role="status"></p><div id="bin-list" class="bin-list"></div>
+    </section>
+    <section class="card simulator" id="simulator">
+      <p class="eyebrow">UNITS III–V · MATERIAL JOURNEY</p><h2>Waste processing simulator</h2>
+      <p class="muted">Step through an example collection and processing sequence, or play it automatically.</p>
+      <label for="sim-material">Material to process</label><select id="sim-material"></select>
+      <ol id="sim-stages" class="sim-stages" aria-label="Processing stages"></ol>
+      <div id="sim-detail" class="sim-detail" aria-live="polite"></div>
+      <div class="actions"><button id="sim-back">Previous step</button><button id="sim-next" class="primary">Next step</button><button id="sim-play">Play sequence</button><button id="sim-reset">Restart</button></div>
+      <p class="muted">Example pathways depend on local acceptance and facility capabilities. Organic waste is included for learning. The photo classifier supports its original six material classes.</p>
+    </section>
+    <section class="card quiz" id="quiz">
+      <p class="eyebrow">TEST YOUR KNOWLEDGE · UNITS III–V</p>
+      <h2>The waste management challenge</h2>
+      <p class="muted">Five questions connect the app to collection, processing, and disposal.</p>
+      <p id="quiz-progress" class="badge"></p>
+      <h3 id="quiz-question"></h3>
+      <div id="quiz-options" class="quiz-options" role="group" aria-labelledby="quiz-question"></div>
+      <p id="quiz-feedback" role="status"></p>
+      <button id="quiz-next" class="primary" hidden>Next question</button>
+      <button id="quiz-restart" hidden>Try again</button>
+    </section>
+    <section class="card evaluation" id="evaluation">
+      <p class="eyebrow">HOLDOUT EVALUATION</p>
+      <h2>How the model performed</h2>
+      <p class="muted" id="metrics-summary">Loading evaluation…</p>
+      <div id="metrics-table"></div>
+      <div id="confusion" hidden>
+        <h3>Where the classifier got confused</h3>
+        <label for="actual-class">Actual material</label>
+        <select id="actual-class"></select>
+        <div id="confusion-row" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">Campus Sort Lab · Integrated Waste Management · Classroom prototype</footer>
+</body>
+</html>
